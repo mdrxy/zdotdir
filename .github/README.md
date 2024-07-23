@@ -15,6 +15,7 @@ A sample antidote `.zsh_plugins.txt` file that bundles plugins with the followin
 
 Clone this project to `$ZDOTDIR`, make a symlink to `.zshenv`, and install [Oh-My-Zsh](https://github.com/ohmyzsh/ohmyzsh).
 
+Run from `~`:
 ```zsh
 # clone this project
 ZDOTDIR=~/.config/zsh
@@ -25,5 +26,6 @@ git clone https://github.com/mdrxy/zdotdir $ZDOTDIR
 ln -s $ZDOTDIR/.zshenv ~/.zshenv
 
 # install omz
-ZSH="$ZDOTDIR" sh -c "$(curl -fSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh
+ZSH="$ZDOTDIR/omz" install.sh
 ```
