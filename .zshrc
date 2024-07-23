@@ -10,6 +10,14 @@ eval $(/opt/homebrew/bin/brew shellenv)
 # https://wiki.zshell.dev/community/zsh_guide/roadmap/expansion
 setopt extended_glob
 
+# Create a cache folder if it isn't exists
+if [ ! -d "$HOME/.cache/zsh" ]; then
+    mkdir -p $HOME/.cache/zsh
+fi
+
+# Define a custom file for compdump
+export ZSH_COMPDUMP="$XDG_CACHE_HOME/zsh/zcompdump-$HOST-$ZSH_VERSION"
+
 # Autoload functions you might want to use with antidote.
 ZFUNCDIR=${ZFUNCDIR:-$ZDOTDIR/functions}
 fpath=($ZFUNCDIR $fpath)
