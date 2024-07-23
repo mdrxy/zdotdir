@@ -15,3 +15,9 @@ zstyle ':antidote:bundle' use-friendly-names 'yes'
 
 # Update automatically without asking
 zstyle ':omz:update' mode auto
+
+source $ZSH/lib/completion.zsh
+zstyle ':completion:*' special-dirs false
+zstyle ':completion::complete:*:*:files' ignored-patterns '.DS_Store' 'Icon?'
+zstyle ':completion::complete:*:*:globbed-files' ignored-patterns '.DS_Store' 'Icon?'
+zstyle ':completion::complete:rm:*:globbed-files' ignored-patterns
