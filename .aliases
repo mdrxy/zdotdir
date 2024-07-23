@@ -34,3 +34,5 @@ alias urlencode='python3 -c "import sys, urllib.parse as ul; \
 # misc
 alias zshrc='${EDITOR:-nano} "${ZDOTDIR:-$HOME}"/.zshrc'
 alias zdot='cd ${ZDOTDIR:-~}'
+alias myip="curl http://ipecho.net/plain; echo"
+alias ip="curl http://ipecho.net/plain; echo"
