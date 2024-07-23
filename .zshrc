@@ -27,6 +27,7 @@ setopt hist_reduce_blanks       # remove superfluous blanks from history
 # May be an issue at some point? https://github.com/ohmyzsh/ohmyzsh/issues/8949
 setopt hist_save_no_dups        # don't write duplicate entries in the history file
 setopt hist_find_no_dups        # don't display lines previously found
+setopt globdots                 # include dotfiles in tab completion
 
 # Create a cache folder if it isn't exists
 if [ ! -d "$HOME/.cache/zsh" ]; then
