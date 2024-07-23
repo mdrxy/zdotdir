@@ -13,3 +13,4 @@ zstyle ':antidote:bundle' use-friendly-names 'yes'
 #
 # Update automatically without asking
 zstyle ':omz:update' mode auto
+zstyle ':completion:*' special-dirs false

@@ -41,9 +41,6 @@ ZFUNCDIR=${ZFUNCDIR:-$ZDOTDIR/functions}
 fpath=($ZFUNCDIR $fpath)
 autoload -Uz $fpath[1]/*(.:t)
 
-# Source zstyles you might use with antidote.
-[[ -e ${ZDOTDIR:-~}/.zstyles ]] && source ${ZDOTDIR:-~}/.zstyles
-
 # Clone antidote if necessary.
 [[ -d ${ZDOTDIR:-~}/.antidote ]] ||
   git clone https://github.com/mattmc3/antidote ${ZDOTDIR:-~}/.antidote
@@ -92,6 +89,9 @@ export LESSHISTFILE=/dev/null
 
 source $ZSH/oh-my-zsh.sh
 autoload -U compinit; compinit
+
+# Source zstyles you might use with antidote.
+[[ -e ${ZDOTDIR:-~}/.zstyles ]] && source ${ZDOTDIR:-~}/.zstyles
 
 # User configuration
 
