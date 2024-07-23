@@ -3,7 +3,11 @@
 # .zshrc - Zsh file loaded on interactive shell sessions.
 #
 
+# Required for Homebrew
+eval $(/opt/homebrew/bin/brew shellenv)
+
 # Zsh options.
+# https://wiki.zshell.dev/community/zsh_guide/roadmap/expansion
 setopt extended_glob
 
 # Autoload functions you might want to use with antidote.
