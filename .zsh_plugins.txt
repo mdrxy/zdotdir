@@ -27,8 +27,6 @@
 ###
 https://github.com/peterhurford/up.zsh
 rummik/zsh-tailf
-mattmc3/zman
-agkozak/zsh-z
 
 
 ### Local Plugins
@@ -90,7 +88,7 @@ sindresorhus/pure
 # bundles can often be made available simply with the `kind:path` annotation.
 #
 ###
-romkatv/zsh-bench kind:path
+# romkatv/zsh-bench kind:path
 
 
 ### Frameworks
@@ -127,45 +125,6 @@ ohmyzsh/ohmyzsh path:plugins/copypath
 ohmyzsh/ohmyzsh path:plugins/extract
 ohmyzsh/ohmyzsh path:plugins/magic-enter
 ohmyzsh/ohmyzsh path:plugins/fancy-ctrl-z
-
-
-### Framework: Prezto
-#
-# Prezto is another popular Zsh framework. You might choose to use parts of it in your
-# config alongside/instead of OMZ. Prezto has some key differences from OMZ. For
-# starters, it doesn't have a lib directory and it calls its plugins 'modules'. Its
-# modules also often have functions directories that need autoloaded. And, because it's
-# meant to be used as an integrated framework, Prezto modules don't operate well as
-# cherry-picking independent plugins, so using Prezto with antidote is not recommended
-# for anyone but the most advanced Zsh users.
-#
-###
-
-# Prezto can be difficult to assemble because it's so interdependent.
-# Use at your own risk.
-# getantidote/use-prezto
-# sorin-ionescu/prezto path:modules/helper/functions kind:autoload
-# sorin-ionescu/prezto path:modules/helper
-# sorin-ionescu/prezto path:modules/environment
-# sorin-ionescu/prezto path:modules/terminal
-# sorin-ionescu/prezto path:modules/editor
-# sorin-ionescu/prezto path:modules/directory
-# sorin-ionescu/prezto path:modules/git/functions kind:autoload
-# sorin-ionescu/prezto path:modules/git
-
-# And Prezto has tons more...
-# sorin-ionescu/prezto path:modules/history
-# sorin-ionescu/prezto path:modules/spectrum
-# sorin-ionescu/prezto path:modules/utility/functions kind:autoload
-# sorin-ionescu/prezto path:modules/utility
-# sorin-ionescu/prezto path:modules/completion
-# sorin-ionescu/prezto path:modules/history-substring-search
-# sorin-ionescu/prezto path:modules/prompt/functions kind:autoload
-# sorin-ionescu/prezto path:modules/prompt
-# sorin-ionescu/prezto path:modules/python
-# sorin-ionescu/prezto path:modules/python/functions kind:autoload
-# sorin-ionescu/prezto path:modules/osx conditional:ismacos
-# sorin-ionescu/prezto path:modules/osx/functions kind:autoload conditional:ismacos
 
 
 ### Framework: zsh-utils
