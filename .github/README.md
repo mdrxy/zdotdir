@@ -3,21 +3,17 @@
 ## What's included
 
 A sample antidote `.zsh_plugins.txt` file that bundles plugins with the following plugin provided features:
-- Better Zsh defaults using [zsh-utils](https://github.com/belak/zsh-utils)
 - [Autosuggestions](https://github.com/zsh-users/zsh-autosuggestions)
 - [History substring searching](https://github.com/zsh-users/zsh-history-substring-search)
 - [Syntax highlighting](https://github.com/zdharma-continuum/fast-syntax-highlighting)
 - <kbd>TAB</kbd> completions
-- The popular [Pure prompt](https://github.com/sindresorhus/pure)
-- A few goodies from [Oh-My-Zsh](https://github.com/ohmyzsh/ohmyzsh)
+- [Oh-My-Zsh](https://github.com/ohmyzsh/ohmyzsh) full lib and plugins
 - A `functions` directory for lazy-loaded functions
 - A custom plugins directory so you can add your own plugins
-- Lots of [helpful plugins](https://github.com/unixorn/awesome-zsh-plugins)!
-- And much more, all without compromising shell speed :rocket:
 
 ## Installation
 
-Clone this project to `$ZDOTDIR`, and then make a symlink to `.zshenv`.
+Clone this project to `$ZDOTDIR`, make a symlink to `.zshenv`, and install [Oh-My-Zsh](https://github.com/ohmyzsh/ohmyzsh).
 
 ```zsh
 # clone this project
@@ -27,6 +23,7 @@ git clone https://github.com/mdrxy/zdotdir $ZDOTDIR
 # symlink .zshenv
 [[ -f ~/.zshenv ]] && mv -f ~/.zshenv ~/.zshenv.bak
 ln -s $ZDOTDIR/.zshenv ~/.zshenv
-```
 
-[antidote]: https://getantidote.github.io
+# install omz
+ZSH="$ZDOTDIR" sh -c "$(curl -fSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+```
