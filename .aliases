@@ -8,9 +8,6 @@ alias _=sudo
 alias l=ls
 alias g=git
 
-# mask built-ins with better defaults
-alias vi=vim
-
 # more ways to ls
 alias ll='ls -lh'
 alias la='ls -lAh'
@@ -35,7 +32,5 @@ alias urlencode='python3 -c "import sys, urllib.parse as ul; \
     print (ul.quote_plus(sys.argv[1]))"'
 
 # misc
-alias please=sudo
-alias zshrc='${EDITOR:-vim} "${ZDOTDIR:-$HOME}"/.zshrc'
-alias zbench='for i in {1..10}; do /usr/bin/time zsh -lic exit; done'
+alias zshrc='${EDITOR:-nano} "${ZDOTDIR:-$HOME}"/.zshrc'
 alias zdot='cd ${ZDOTDIR:-~}'
