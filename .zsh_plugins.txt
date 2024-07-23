@@ -68,7 +68,6 @@ ohmyzsh/ohmyzsh path:plugins/python
 ###
 https://github.com/peterhurford/up.zsh
 
-
 ### Local Plugins
 #
 # Plugins don't have to come from GitHub. You can also use local files or directories to
@@ -77,7 +76,6 @@ https://github.com/peterhurford/up.zsh
 ###
 $ZDOTDIR/.aliases
 #$ZDOTDIR/custom/plugins/example
-
 
 ### Local Plugins with Variables
 #
@@ -95,7 +93,6 @@ $ZDOTDIR/.aliases
 # $ZSH_CUSTOM/plugins/nodejs
 # $ZSH_CUSTOM/plugins/python
 # $ZSH_CUSTOM/plugins/ruby
-
 
 ### Prompts
 #
