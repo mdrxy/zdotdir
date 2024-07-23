@@ -1,11 +1,5 @@
 # zdotdir
 
-> A sample Zsh config using the antidote plugin manager
-
-## Description
-
-This project aims to give you an example Zsh config that uses [antidote] as a plugin manager and pulls some amazing Zsh plugins together. Consider it an example configuration of how to use antidote. Feel free to borrow from it for your own config, or fork it and make it your own.
-
 ## What's included
 
 A sample antidote `.zsh_plugins.txt` file that bundles plugins with the following plugin provided features:
@@ -28,14 +22,11 @@ Clone this project to `$ZDOTDIR`, and then make a symlink to `.zshenv`.
 ```zsh
 # clone this project
 ZDOTDIR=~/.config/zsh
-git clone https://github.com/getantidote/zdotdir $ZDOTDIR
+git clone https://github.com/mdrxy/zdotdir $ZDOTDIR
 
 # symlink .zshenv
 [[ -f ~/.zshenv ]] && mv -f ~/.zshenv ~/.zshenv.bak
 ln -s $ZDOTDIR/.zshenv ~/.zshenv
-
-# start a new zsh session
-zsh
 ```
 
 [antidote]: https://getantidote.github.io
