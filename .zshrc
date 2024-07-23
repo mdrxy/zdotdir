@@ -1,12 +1,12 @@
 #
 # .zshrc - Zsh file loaded on interactive shell sessions.
 #
-
+zstyle ':completion:*' special-dirs false
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.config/zsh/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block; everything else may go below.
-if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-$USER/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
-  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-$USER/p10k-instant-prompt-${(%):-%n}.zsh"
+if [[ -r "${XDG_CACHE_HOME/p10k-${(%):-%n}:-$HOME/.cache/p10k-${(%):-%n}}/p10k-${(%):-%n}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME/p10k-${(%):-%n}:-$HOME/.cache/p10k-${(%):-%n}}/p10k-${(%):-%n}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
 # Zsh options.
