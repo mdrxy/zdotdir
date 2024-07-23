@@ -6,12 +6,10 @@
 #
 # Antidote
 #
-
 zstyle ':antidote:bundle' use-friendly-names 'yes'
 
 #
 # Oh-My-Zsh
 #
-
 # Update automatically without asking
 zstyle ':omz:update' mode auto
