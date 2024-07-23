@@ -48,12 +48,14 @@
 getantidote/use-omz
 ohmyzsh/ohmyzsh path:lib
 
+# General
 ohmyzsh/ohmyzsh path:plugins/colored-man-pages
 ohmyzsh/ohmyzsh path:plugins/copybuffer
 ohmyzsh/ohmyzsh path:plugins/copyfile
 ohmyzsh/ohmyzsh path:plugins/copypath
 ohmyzsh/ohmyzsh path:plugins/extract
 
+# Dev
 ohmyzsh/ohmyzsh path:plugins/git
 ohmyzsh/ohmyzsh path:plugins/python
 
@@ -111,8 +113,8 @@ $ZDOTDIR/.aliases
 #
 ###
 
-# Use kind:fpath for prompts you want available to promptinit.
-romkatv/powerlevel10k kind:fpath
+# Use kind:fpath for prompts you want available to promptinit. (I don't care for multiple options so just using regular loading)
+romkatv/powerlevel10k
 
 
 ### Utilities
@@ -139,7 +141,6 @@ romkatv/powerlevel10k kind:fpath
 ###
 
 # Syntax highlighting
-#zsh-users/zsh-syntax-highlighting kind:defer
 zdharma-continuum/fast-syntax-highlighting kind:defer
 
 
