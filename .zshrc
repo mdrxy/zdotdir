@@ -87,6 +87,7 @@ export LESSHISTFILE=/dev/null
 #
 # !!! Plugins loaded via antidote
 
+zstyle ':omz:update' mode auto # Necessary before sourcing oh-my-zsh
 source $ZSH/oh-my-zsh.sh
 autoload -U compinit; compinit
 
