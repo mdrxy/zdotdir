@@ -19,6 +19,45 @@
 ###
 
 
+### Frameworks
+#
+# Frameworks are a collection of Zsh features, settings, and plugins meant to ease
+# Zsh configuration. Unfortunately, all that power can come with serious drawbacks.
+# Frameworks can often set more settings or aliases than you need, cluttering your Zsh
+# config and slowing things down. Use with caution!
+#
+# Frameworks are handled in antidote using the `path:location/of/plugin` annotation.
+#
+###
+
+
+### Framework: Oh-My-Zsh
+#
+# Oh-My-Zsh is a very popular Zsh framework. You might choose to use plugins from OMZ
+# in your own config. Depending on which plugins you use, you may also need to include
+# OMZ's entire "lib" directory. If you do this, be careful - "lib" configures a lot of
+# very broad settings. If you are familiar with what you are doing, you may choose to
+# only include parts of "lib".
+#
+#   # use all of lib
+#   ohmyzsh/ohmyzsh path:lib
+#   # -OR-, only use only the specific files we care about
+#   ohmyzsh/ohmyzsh path:lib/clipboard.zsh
+#
+####
+getantidote/use-omz
+ohmyzsh/ohmyzsh path:lib
+
+ohmyzsh/ohmyzsh path:plugins/colored-man-pages
+ohmyzsh/ohmyzsh path:plugins/copybuffer
+ohmyzsh/ohmyzsh path:plugins/copyfile
+ohmyzsh/ohmyzsh path:plugins/copypath
+ohmyzsh/ohmyzsh path:plugins/extract
+
+ohmyzsh/ohmyzsh path:plugins/git
+ohmyzsh/ohmyzsh path:plugins/python
+
+
 ### Regular Plugins
 #
 # Plugins are the simplest kind of bundles. You can point to a full git URL, or if you
@@ -26,7 +65,6 @@
 #
 ###
 https://github.com/peterhurford/up.zsh
-rummik/zsh-tailf
 
 
 ### Local Plugins
@@ -76,9 +114,6 @@ $ZDOTDIR/.aliases
 # Use kind:fpath for prompts you want available to promptinit.
 romkatv/powerlevel10k kind:fpath
 
-# Or, just load a prompt plugin the normal way.
-sindresorhus/pure
-
 
 ### Utilities
 #
@@ -89,55 +124,6 @@ sindresorhus/pure
 #
 ###
 # romkatv/zsh-bench kind:path
-
-
-### Frameworks
-#
-# Frameworks are a collection of Zsh features, settings, and plugins meant to ease
-# Zsh configuration. Unfortunately, all that power can come with serious drawbacks.
-# Frameworks can often set more settings or aliases than you need, cluttering your Zsh
-# config and slowing things down. Use with caution!
-#
-# Frameworks are handled in antidote using the `path:location/of/plugin` annotation.
-#
-###
-
-
-### Framework: Oh-My-Zsh
-#
-# Oh-My-Zsh is a very popular Zsh framework. You might choose to use plugins from OMZ
-# in your own config. Depending on which plugins you use, you may also need to include
-# OMZ's entire "lib" directory. If you do this, be careful - "lib" configures a lot of
-# very broad settings. If you are familiar with what you are doing, you may choose to
-# only include parts of "lib".
-#
-#   # use all of lib
-#   ohmyzsh/ohmyzsh path:lib
-#   # -OR-, only use only the specific files we care about
-#   ohmyzsh/ohmyzsh path:lib/clipboard.zsh
-#
-####
-getantidote/use-omz
-ohmyzsh/ohmyzsh path:lib/clipboard.zsh
-ohmyzsh/ohmyzsh path:plugins/copybuffer
-ohmyzsh/ohmyzsh path:plugins/copyfile
-ohmyzsh/ohmyzsh path:plugins/copypath
-ohmyzsh/ohmyzsh path:plugins/extract
-ohmyzsh/ohmyzsh path:plugins/magic-enter
-ohmyzsh/ohmyzsh path:plugins/fancy-ctrl-z
-
-
-### Framework: zsh-utils
-#
-# zsh-utils is a micro-framework that is also well suited to pair with antidote. It
-# provides much of the same core functionality from other bigger frameworks without the
-# bloat or performance hit. Using zsh-utils, you may find you don't need much else.
-# If you want a really thin framework, this is great.
-#
-###
-belak/zsh-utils path:history
-belak/zsh-utils path:utility
-belak/zsh-utils path:editor
 
 
 ### Deferred Plugins
@@ -173,11 +159,6 @@ zdharma-continuum/fast-syntax-highlighting kind:defer
 # zsh-users/zsh-completions is a popular plugin for adding supplemental completions.
 # We combine the `path:` and `kind:fpath` annotations here:
 zsh-users/zsh-completions path:src kind:fpath
-
-# If you want to use the belak/zsh-utils completion plugin to run your compinit, this
-# plugin is meant to be run near the END of your .zsh_plugins.txt file after fpath is
-# fully populated.
-belak/zsh-utils path:completion
 
 
 ### Final Plugins
