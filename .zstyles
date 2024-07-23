@@ -7,5 +7,11 @@
 # Antidote
 #
 
-# zstyle ':antidote:bundle' file ${ZDOTDIR:-~}/.zplugins.txt
 zstyle ':antidote:bundle' use-friendly-names 'yes'
+
+#
+# Oh-My-Zsh
+#
+
+# Update automatically without asking
+zstyle ':omz:update' mode auto
