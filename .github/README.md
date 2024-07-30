@@ -2,7 +2,7 @@
 
 ## What's included
 
-A sample antidote `.zsh_plugins.txt` file that bundles plugins with the following plugin provided features:
+A sample [antidote](https://github.com/mattmc3/antidote) `.zsh_plugins.txt` file that bundles plugins with the following plugin provided features:
 - [Autosuggestions](https://github.com/zsh-users/zsh-autosuggestions)
 - [History substring searching](https://github.com/zsh-users/zsh-history-substring-search)
 - [Syntax highlighting](https://github.com/zdharma-continuum/fast-syntax-highlighting)
