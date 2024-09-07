@@ -27,5 +27,5 @@ ln -s $ZDOTDIR/.zshenv ~/.zshenv
 
 # install omz
 wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh
-ZSH="$ZDOTDIR/omz" install.sh
+ZSH="$ZDOTDIR/omz" sh install.sh
 ```
