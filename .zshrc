@@ -13,7 +13,7 @@ fi
 # Globs
 # https://wiki.zshell.dev/community/zsh_guide/roadmap/expansion
 # Seems to already be enabled by OMZ defaults
-# setopt extended_glob 
+# setopt extended_glob
 
 # History command configuration (ALREADY SET BY OMZ)
 # setopt extended_history       # record timestamp of command in HISTFILE
@@ -102,10 +102,6 @@ if [[ -n $SSH_CONNECTION ]]; then
 else
   export EDITOR='nano'
 fi
-
-# Compilation flags
-# export ARCHFLAGS="-arch x86_64"
-
 
 # p10k
 
