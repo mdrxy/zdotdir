@@ -12,5 +12,5 @@ zstyle ':antidote:bundle' use-friendly-names 'yes'
 # Oh-My-Zsh
 #
 # Update automatically without asking
-# zstyle ':omz:update' mode auto -- needs to be before oh-my-zsh is sourced
+# zstyle ':omz:update' mode auto -- needs to be before oh-my-zsh is sourced. This should not be uncommented.
 zstyle ':completion:*' special-dirs false
