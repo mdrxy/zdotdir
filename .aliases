@@ -3,6 +3,9 @@
 # .aliases - Set whatever shell aliases you want.
 #
 
+# git
+alias remote='git remote -v'
+
 # nvm
 alias loadnvm='[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"'
 
