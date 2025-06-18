@@ -3,23 +3,22 @@
 # .aliases - Set whatever shell aliases you want.
 #
 
+# nvm
+alias loadnvm='[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"'
+
 # single character aliases - be sparing!
 alias _=sudo
 alias l=ls
 alias g=git
 
 # more ways to ls
-alias ll='ls -lh'
-alias la='ls -lAh'
+alias la='ls -A'
+alias ll='ls -lAh'
 alias ldot='ls -ld .*'
 
 # fix common typos
 alias quit='exit'
 alias cd..='cd ..'
-
-# tar
-alias tarls="tar -tvf"
-alias untar="tar -xf"
 
 # find
 alias fd='find . -type d -name'
@@ -34,5 +33,5 @@ alias urlencode='python3 -c "import sys, urllib.parse as ul; \
 # misc
 alias zshrc='${EDITOR:-nano} "${ZDOTDIR:-$HOME}"/.zshrc'
 alias zdot='cd ${ZDOTDIR:-~}'
-alias myip="curl http://ipecho.net/plain; echo"
 alias ip="curl http://ipecho.net/plain; echo"
+alias myip=ip

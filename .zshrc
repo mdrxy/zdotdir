@@ -8,14 +8,16 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
+# Disable less history file
+export LESSHISTFILE=/dev/null
+export EDITOR='nano'
+# Define a custom file for compdump
+export ZSH_COMPDUMP="$XDG_CACHE_HOME/zsh/zcompdump-$HOST-$ZSH_VERSION"
+
+
 # Zsh options.
 
-# Globs
-# https://wiki.zshell.dev/community/zsh_guide/roadmap/expansion
-# Seems to already be enabled by OMZ defaults
-# setopt extended_glob
-
-# History command configuration (ALREADY SET BY OMZ)
+# History command configuration (commented out: ALREADY SET BY OMZ I think)
 # setopt extended_history       # record timestamp of command in HISTFILE
 # setopt hist_expire_dups_first # delete duplicates first when HISTFILE size exceeds HISTSIZE
 # setopt hist_ignore_dups       # ignore duplicated commands history list
@@ -23,7 +25,6 @@ fi
 # setopt hist_verify            # show command with history expansion to user before running it
 # setopt share_history          # share command history data
 setopt hist_reduce_blanks       # remove superfluous blanks from history
-# May be an issue at some point? https://github.com/ohmyzsh/ohmyzsh/issues/8949
 setopt hist_save_no_dups        # don't write duplicate entries in the history file
 setopt hist_find_no_dups        # don't display lines previously found
 setopt globdots                 # include dotfiles in tab completion
@@ -33,37 +34,26 @@ if [ ! -d "$HOME/.cache/zsh" ]; then
     mkdir -p $HOME/.cache/zsh
 fi
 
-# Define a custom file for compdump
-export ZSH_COMPDUMP="$XDG_CACHE_HOME/zsh/zcompdump-$HOST-$ZSH_VERSION"
-
 # Autoload functions you might want to use with antidote.
-ZFUNCDIR=${ZFUNCDIR:-$ZDOTDIR/functions}
+ZFUNCDIR=${ZDOTDIR:-$HOME}/.zfunctions
 fpath=($ZFUNCDIR $fpath)
-autoload -Uz $fpath[1]/*(.:t)
+autoload -Uz $ZFUNCDIR/*(.:t)
+
+# zstyles
+[[ ! -f ${ZDOTDIR:-$HOME}/.zstyles ]] || source ${ZDOTDIR:-$HOME}/.zstyles
 
 # Clone antidote if necessary.
-[[ -d ${ZDOTDIR:-~}/.antidote ]] ||
-  git clone https://github.com/mattmc3/antidote ${ZDOTDIR:-~}/.antidote
+[[ -d ${ZDOTDIR:-$HOME}/.antidote ]] ||
+  git clone https://github.com/mattmc3/antidote ${ZDOTDIR:-$HOME}/.antidote
 
-source ${ZDOTDIR:-~}/.antidote/antidote.zsh
+source ${ZDOTDIR:-$HOME}/.antidote/antidote.zsh
 antidote load
-
-# Uncomment the following line if pasting URLs and other text is messed up.
-# DISABLE_MAGIC_FUNCTIONS="true"
-
-# Uncomment the following line to disable auto-setting terminal title.
-# DISABLE_AUTO_TITLE="true"
 
 # Uncomment the following line to display red dots whilst waiting for completion.
 # You can also set it to another string to have that shown instead of the default red dots.
 # e.g. COMPLETION_WAITING_DOTS="%F{yellow}waiting...%f"
 # Caution: this setting can cause issues with multiline prompts in zsh < 5.7.1 (see #5765)
 COMPLETION_WAITING_DOTS="true"
-
-# Uncomment the following line if you want to disable marking untracked files
-# under VCS as dirty. This makes repository status check for large repositories
-# much, much faster.
-# DISABLE_UNTRACKED_FILES_DIRTY="true"
 
 # Uncomment the following line if you want to change the command execution time
 # stamp shown in the history command output.
@@ -73,37 +63,21 @@ COMPLETION_WAITING_DOTS="true"
 # see 'man strftime' for details.
 HIST_STAMPS="yyyy-mm-dd"
 
-export LESSHISTFILE=/dev/null
-
-# Would you like to use another custom folder than $ZSH/custom?
-# ZSH_CUSTOM=/path/to/new-custom-folder
-
-# Which plugins would you like to load?
-# Standard plugins can be found in $ZSH/plugins/
-# Custom plugins may be added to $ZSH_CUSTOM/plugins/
-# Example format: plugins=(rails git textmate ruby lighthouse)
-# Add wisely, as too many plugins slow down shell startup.
-# plugins=(git)
-#
-# !!! Plugins loaded via antidote
 
 zstyle ':omz:update' mode auto # Necessary before sourcing oh-my-zsh
 source $ZSH/oh-my-zsh.sh
+
 autoload -U compinit; compinit
 
-# Source zstyles you might use with antidote.
-[[ -e ${ZDOTDIR:-~}/.zstyles ]] && source ${ZDOTDIR:-~}/.zstyles
 
-# User configuration
+export NVM_DIR="$HOME/.nvm"
+# [ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
+# Use `loadnvm` instead! This was really slow
+[ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
 
-# Preferred editor for local and remote sessions
-if [[ -n $SSH_CONNECTION ]]; then
-  export EDITOR='nano'
-else
-  export EDITOR='nano'
-fi
 
-# p10k
+# To customize prompt, run `p10k configure` or edit ~/.config/zsh/.p10k.zsh.
+[[ ! -f ${ZDOTDIR:-$HOME}/.p10k.zsh ]] || source ${ZDOTDIR-$HOME}/.p10k.zsh
 
 # To customize prompt, run `p10k configure` or edit ~/.config/zsh/.p10k.zsh.
 [[ ! -f ~/.config/zsh/.p10k.zsh ]] || source ~/.config/zsh/.p10k.zsh
