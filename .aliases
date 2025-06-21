@@ -3,6 +3,12 @@
 # .aliases - Set whatever shell aliases you want.
 #
 
+# Work
+alias format="make format"
+alias fmat=format
+alias lint="make lint"
+alias lnt=lint
+
 # git
 alias remote='git remote -v'
 
@@ -38,3 +44,39 @@ alias zshrc='${EDITOR:-nano} "${ZDOTDIR:-$HOME}"/.zshrc'
 alias zdot='cd ${ZDOTDIR:-~}'
 alias ip="curl http://ipecho.net/plain; echo"
 alias myip=ip
+
+# functions
+
+# Git repository aliases
+repo() {
+  # Usage:
+  # `repo pulls`
+  # `repo pull 123`
+  # `repo issues`
+  # `repo issues 456`
+  open "$(git config --get remote.origin.url | sed 's|git@\(.*\):\(.*\)\.git|https://\1/\2|')/$1/$2"
+}
+
+branch() {
+  # Usage: `branch`
+  # Opens current branch on the web
+  local branch=$(git rev-parse --abbrev-ref HEAD)
+  open "$(git config --get remote.origin.url | sed 's|git@\(.*\):\(.*\)\.git|https://\1/\2|; s|\.git$||')/tree/$branch"
+}
+
+function pull-fork() {
+  # Fetch and check out a branch from a fork
+  # e.g. pull code from someone elses fork for PR reviews and edits
+
+  if [ -z "$1" ]; then
+    echo "Usage: pull-fork <author/contributor> [branch]"
+    return 1
+  fi
+  author="$1"
+  branch="${2:-main}"
+  repo=$(basename -s .git "$(git config --get remote.origin.url)")
+  remote_url="https://github.com/${author}/${repo}.git"
+  git remote add "$author" "$remote_url" 2>/dev/null || git remote set-url "$author" "$remote_url"
+  git fetch "$author"
+  git checkout -B "$author/$branch" "$author/$branch"
+}
