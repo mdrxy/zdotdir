@@ -5,9 +5,13 @@
 
 # Work
 alias format="make format"
-alias fmat=format
+alias fmat="make format"
 alias lint="make lint"
 alias lnt=lint
+alias fix="uv run --all-groups ruff check . --fix"
+alias lf="format format lint"
+alias uvs="uv sync"
+alias uvsa="uv sync --active"
 
 # git
 alias remote='git remote -v'
@@ -47,7 +51,7 @@ alias myip=ip
 
 # functions
 
-# Git repository aliases
+# Open local repo on GitHub
 repo() {
   # Usage:
   # `repo pulls`
@@ -57,14 +61,96 @@ repo() {
   open "$(git config --get remote.origin.url | sed 's|git@\(.*\):\(.*\)\.git|https://\1/\2|')/$1/$2"
 }
 
+# Open current branch on GitHub
 branch() {
   # Usage: `branch`
-  # Opens current branch on the web
   local branch=$(git rev-parse --abbrev-ref HEAD)
   open "$(git config --get remote.origin.url | sed 's|git@\(.*\):\(.*\)\.git|https://\1/\2|; s|\.git$||')/tree/$branch"
 }
 
-function pull-fork() {
+# Sync `uv` environ and activate venv
+function usync() {
+  export UV_PROJECT_ENVIRONMENT="$(pwd)/.venv"
+  uv venv 2>/dev/null
+  uv sync
+  source .venv/bin/activate
+}
+
+# See old branches listed
+alias old_b='git for-each-ref --sort=committerdate refs/heads/ --format="%(refname:short) - %(committerdate:relative)"'
+
+# Clean up repo branches
+function prune_old_b() {
+  # Usage examples:
+  #  prune_old_b 45             # Delete branches older than 45 days; always keep main/master
+  #  prune_old_b 30 feature-x   # Also whitelist 'feature-x'
+  #  prune_old_b 30 -n          # Dry run only (no deletions)
+  #  prune_old_b 60 -n test bug  # Dry run with additional whitelist entries 'test' and 'bug'
+
+
+  # Number of days to keep (default: 30)
+  local days=${1:-30}
+  shift
+
+  # Parse flags and whitelist arguments
+  local dry_run=false
+  local extra_whitelist=()
+  for arg in "$@"; do
+    case "$arg" in
+      -n|--dry-run)
+        dry_run=true
+        ;;
+      *)
+        extra_whitelist+=("$arg")
+        ;;
+    esac
+  done
+
+  # Always whitelist main and master, plus any extras
+  local whitelist=("main" "master" "${extra_whitelist[@]}")
+
+  # Determine cutoff date (Unix timestamp)
+  local cutoff_date
+  if date -v -${days}d >/dev/null 2>&1; then
+    # macOS BSD date
+    cutoff_date=$(date -v -${days}d +%s)
+  else
+    # GNU date (Linux)
+    cutoff_date=$(date -d "-${days} days" +%s)
+  fi
+
+  local current_branch=$(git rev-parse --abbrev-ref HEAD)
+
+  echo "🧹 Pruning branches older than ${days} days..."
+  echo "🔒 Whitelist: ${whitelist[*]}"
+  $dry_run && echo "🌐 Dry run mode: no branches will be deleted"
+
+  git for-each-ref --format='%(refname:short) %(committerdate:unix)' refs/heads/ | while read branch date; do
+    # Skip current branch
+    [[ "$branch" == "$current_branch" ]] && continue
+
+    # Skip whitelisted branches
+    for w in "${whitelist[@]}"; do
+      [[ "$branch" == "$w" ]] && continue 2
+    done
+
+    # Check age and delete or dry-run
+    if (( date < cutoff_date )); then
+      if $dry_run; then
+        echo "🗑 [DRY RUN] Would delete: $branch (last commit over ${days} days ago)"
+      else
+        echo "🗑 Deleting: $branch (last commit over ${days} days ago)"
+        git branch -D "$branch"
+      fi
+    fi
+  done
+}
+
+
+
+# ...
+
+function pfi() {
   # Fetch and check out a branch from a fork
   # e.g. pull code from someone elses fork for PR reviews and edits
 
@@ -76,6 +162,33 @@ function pull-fork() {
   branch="${2:-main}"
   repo=$(basename -s .git "$(git config --get remote.origin.url)")
   remote_url="https://github.com/${author}/${repo}.git"
+  git remote add "$author" "$remote_url" 2>/dev/null || git remote set-url "$author" "$remote_url"
+  git fetch "$author"
+  git checkout -B "$author/$branch" "$author/$branch"
+}
+
+function pf() {
+  # Fetch and check out a branch from a fork using {author}:{branch/name}
+  # Example: pull-fork alice:fix:docs
+
+  if [ -z "$1" ]; then
+    echo "Usage: pf {author}:{branch}"
+    return 1
+  fi
+
+  IFS=':' read -r author branch <<< "$1"
+
+  if [ -z "$author" ] || [ -z "$branch" ]; then
+    echo "Invalid format. Expected {author}:{branch}, got '$1'"
+    return 1
+  fi
+
+  # Reconstruct full branch name in case there were extra colons
+  branch="${1#${author}:}"
+
+  repo=$(basename -s .git "$(git config --get remote.origin.url)")
+  remote_url="https://github.com/${author}/${repo}.git"
+
   git remote add "$author" "$remote_url" 2>/dev/null || git remote set-url "$author" "$remote_url"
   git fetch "$author"
   git checkout -B "$author/$branch" "$author/$branch"
