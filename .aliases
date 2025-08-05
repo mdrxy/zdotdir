@@ -3,11 +3,16 @@
 # .aliases - Set whatever shell aliases you want.
 #
 
+alias utc="date -u && date -u +%s"
+
 # Work
 alias format="make format"
 alias fmat=format
 alias lint="make lint"
 alias lnt=lint
+
+# python
+alias python=python3
 
 # git
 alias remote='git remote -v'
