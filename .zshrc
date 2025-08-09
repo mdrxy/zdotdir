@@ -8,6 +8,12 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
+if [[ -f "${ZDOTDIR:-$HOME}/.env" ]]; then
+    set -a  # automatically export all variables
+    source "${ZDOTDIR:-$HOME}/.env"
+    set +a  # stop auto-exporting
+fi
+
 # Disable less history file
 export LESSHISTFILE=/dev/null
 
