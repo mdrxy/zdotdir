@@ -1,3 +1,4 @@
+.env
 .antidote/
 .zcompcache/
 .zsh_sessions/

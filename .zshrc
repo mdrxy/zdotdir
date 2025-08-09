@@ -10,8 +10,12 @@ fi
 
 # Disable less history file
 export LESSHISTFILE=/dev/null
-export EDITOR='nano'
-# Define a custom file for compdump
+
+# Skip compaudit security checks for faster startup
+export ZSH_DISABLE_COMPFIX=true
+export DISABLE_COMPFIX=true  # Alternative OMZ variable
+
+# Custom location for compdump
 export ZSH_COMPDUMP="$XDG_CACHE_HOME/zsh/zcompdump-$HOST-$ZSH_VERSION"
 
 
@@ -34,7 +38,7 @@ if [ ! -d "$HOME/.cache/zsh" ]; then
     mkdir -p $HOME/.cache/zsh
 fi
 
-# Autoload functions you might want to use with antidote.
+# Autoload functions to use with antidote
 ZFUNCDIR=${ZDOTDIR:-$HOME}/.zfunctions
 fpath=($ZFUNCDIR $fpath)
 autoload -Uz $ZFUNCDIR/*(.:t)
@@ -42,7 +46,7 @@ autoload -Uz $ZFUNCDIR/*(.:t)
 # zstyles
 [[ ! -f ${ZDOTDIR:-$HOME}/.zstyles ]] || source ${ZDOTDIR:-$HOME}/.zstyles
 
-# Clone antidote if necessary.
+# Clone antidote if necessary (should only happen if it is mistakenly removed)
 [[ -d ${ZDOTDIR:-$HOME}/.antidote ]] ||
   git clone https://github.com/mattmc3/antidote ${ZDOTDIR:-$HOME}/.antidote
 
@@ -64,17 +68,53 @@ COMPLETION_WAITING_DOTS="true"
 HIST_STAMPS="yyyy-mm-dd"
 
 
-zstyle ':omz:update' mode auto # Necessary before sourcing oh-my-zsh
-source $ZSH/oh-my-zsh.sh
+zstyle ':omz:update' mode disabled # Disable automatic updates for faster startup
+# oh-my-zsh loaded via antidote plugins
+# source $ZSH/oh-my-zsh.sh
 
-autoload -U compinit; compinit
+# Compinit handled by use-omz plugin via antidote
+# Skip manual compinit to avoid duplication
 
 
-export NVM_DIR="$HOME/.nvm"
-# [ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
-# Use `loadnvm` instead! This was really slow...
-[ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
+eval "$(fnm env --use-on-cd)"
 
 
 # To customize prompt, run `p10k configure` or edit ~/.config/zsh/.p10k.zsh.
 [[ ! -f ${ZDOTDIR:-$HOME}/.p10k.zsh ]] || source ${ZDOTDIR-$HOME}/.p10k.zsh
+
+
+# Ruby - lazy loaded
+# source /opt/homebrew/opt/chruby/share/chruby/chruby.sh
+# source /opt/homebrew/opt/chruby/share/chruby/auto.sh
+# chruby ruby-3.4.1
+
+# Auto-activate virtual environments when changing directories
+function auto_venv() {
+    # Deactivate current venv if active
+    if [[ -n "$VIRTUAL_ENV" ]]; then
+        deactivate 2>/dev/null
+    fi
+
+    # Look for .venv in current directory and parent directories
+    local dir="$PWD"
+    while [[ "$dir" != "/" ]]; do
+        if [[ -f "$dir/.venv/bin/activate" ]]; then
+            source "$dir/.venv/bin/activate" >/dev/null 2>&1
+            return
+        fi
+        dir="$(dirname "$dir")"
+    done
+}
+
+# Hook auto_venv to directory changes (works with auto_cd and regular cd)
+function chpwd() {
+    auto_venv
+}
+
+# Also hook to cd command for compatibility
+function cd() {
+    builtin cd "$@" && auto_venv
+}
+
+# Activate venv for current directory on shell startup
+auto_venv

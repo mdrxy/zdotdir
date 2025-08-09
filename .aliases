@@ -4,20 +4,42 @@
 #
 
 # Work
-alias format="make format"
-alias fmat="make format"
-alias lint="make lint"
-alias lnt=lint
+alias f="make format"
+alias lt="make lint"
 alias fix="uv run --all-groups ruff check . --fix"
-alias lf="format format lint"
-alias uvs="uv sync"
-alias uvsa="uv sync --active"
+alias lf="f && lt"
+alias uvs="uv sync --all-groups"
+alias utc="date -u && date -u +%s"
+alias t="make test"
+alias ti="make integration_tests"
+
+# python
+alias python=python3
 
 # git
 alias remote='git remote -v'
 
-# nvm
-alias loadnvm='[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"'
+# Enhanced git workflow aliases
+alias gfp='git fetch --prune'  # Fetch and prune deleted remote branches
+alias gbd='git branch --merged | grep -v "main\|master" | xargs -n 1 git branch -d'  # Delete merged branches (safe cleanup)
+alias gbu='git branch --no-merged | grep -v "main\|master"'  # List unmerged branches
+
+# Ruby - lazy loaded
+chruby() {
+    unset -f chruby ruby
+    source /opt/homebrew/opt/chruby/share/chruby/chruby.sh
+    source /opt/homebrew/opt/chruby/share/chruby/auto.sh
+    chruby ruby-3.4.1
+    chruby "$@"
+}
+
+ruby() {
+    unset -f chruby ruby
+    source /opt/homebrew/opt/chruby/share/chruby/chruby.sh
+    source /opt/homebrew/opt/chruby/share/chruby/auto.sh
+    chruby ruby-3.4.1
+    ruby "$@"
+}
 
 # single character aliases - be sparing!
 alias _=sudo
@@ -47,7 +69,6 @@ alias urlencode='python3 -c "import sys, urllib.parse as ul; \
 alias zshrc='${EDITOR:-nano} "${ZDOTDIR:-$HOME}"/.zshrc'
 alias zdot='cd ${ZDOTDIR:-~}'
 alias ip="curl http://ipecho.net/plain; echo"
-alias myip=ip
 
 # functions
 
@@ -75,6 +96,255 @@ function usync() {
   uv sync
   source .venv/bin/activate
 }
+
+
+# Get a PR diff as markdown
+prd() {
+  local print_mode=0
+  local pr_number=
+
+  # Parse args
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      -p|--print) print_mode=1; shift ;;
+      *) pr_number="$1"; shift ;;
+    esac
+  done
+
+  # Determine PR number if not provided
+  if [[ -z "$pr_number" ]]; then
+    pr_number=$(gh pr view --json number -q .number 2>/dev/null)
+    if [[ -z "$pr_number" ]]; then
+      echo "Could not determine current PR. Usage: prd [-p|--print] [PR_NUMBER]"
+      return 1
+    fi
+  fi
+
+  if [[ $print_mode -eq 1 ]]; then
+    gh pr diff "$pr_number"
+  else
+    local file="pr_diff_${pr_number}.md"
+    if gh pr diff "$pr_number" > "$file"; then
+      echo "Saved diff to $file"
+    else
+      return 1
+    fi
+  fi
+}
+
+# Export PR with comments to markdown
+prmd() {
+  local print_mode=0
+  local pr_number=
+  local filter_resolved=0
+  local repo_arg=""
+
+  # Show usage if explicit help requested
+  for arg in "$@"; do
+    if [[ "$arg" == "-h" || "$arg" == "--help" ]]; then
+      echo "Usage: prmd [-p|--print] [-r|--filter-resolved] [-R|--repo owner/repo] [PR_NUMBER]"
+      echo ""
+      echo "Export a GitHub PR with comments to markdown format"
+      echo ""
+      echo "Options:"
+      echo "  -h, --help              Show this help message"
+      echo "  -p, --print             Print to stdout instead of saving to file"
+      echo "  -r, --filter-resolved   Only show unresolved code comments"
+      echo "  -R, --repo REPO         Specify repository (owner/repo format)"
+      echo "  PR_NUMBER               PR number (optional if in current PR branch)"
+      echo ""
+      echo "Examples:"
+      echo "  prmd                    Export current PR to file"
+      echo "  prmd 123                Export PR #123 to file"
+      echo "  prmd -p                 Print current PR to stdout"
+      echo "  prmd -p 123             Print PR #123 to stdout"
+      echo "  prmd -r                 Export current PR with only unresolved comments"
+      echo "  prmd -r 123             Export PR #123 with only unresolved comments"
+      echo "  prmd -R owner/repo 123  Export PR #123 from specified repository"
+      return 0
+    fi
+  done
+
+  # Parse args
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      -p|--print) print_mode=1; shift ;;
+      -r|--filter-resolved) filter_resolved=1; shift ;;
+      -R|--repo) repo_arg="$2"; shift 2 ;;
+      *) pr_number="$1"; shift ;;
+    esac
+  done
+
+  # Determine repository context
+  if [[ -n "$repo_arg" ]]; then
+    local repo_context="--repo $repo_arg"
+  elif git rev-parse --git-dir >/dev/null 2>&1; then
+    local repo_context=""
+  else
+    echo "Error: Not in a git repository and no --repo specified"
+    echo "Usage: prmd [-p|--print] [-r|--filter-resolved] [-R|--repo owner/repo] [PR_NUMBER]"
+    return 1
+  fi
+
+  # Determine PR number if not provided
+  if [[ -z "$pr_number" ]]; then
+    if [[ -n "$repo_context" ]]; then
+      echo "Error: PR number required when using --repo option"
+      return 1
+    fi
+    pr_number=$(gh pr view --json number -q .number 2>/dev/null)
+    if [[ -z "$pr_number" ]]; then
+      echo "Could not determine current PR. Usage: prmd [-p|--print] [-r|--filter-resolved] [-R|--repo owner/repo] [PR_NUMBER]"
+      return 1
+    fi
+  fi
+
+  local file="pr_${pr_number}_comments.md"
+  local temp_file="/tmp/prmd_$$"
+
+  # Get PR details - clean problematic control characters from JSON (keep newlines)
+  local pr_data=$(gh pr view "$pr_number" $repo_context --json title,author,body,number,url,state,baseRefName,headRefName,createdAt,updatedAt,reviewDecision | tr -d '\000-\010\013\014\016-\037')
+
+  if [[ -z "$pr_data" ]]; then
+    echo "Error: Could not fetch PR #$pr_number"
+    return 1
+  fi
+
+  # Extract PR information with better error handling
+  local title=$(echo "$pr_data" | jq -r '.title // "No Title"')
+  local author=$(echo "$pr_data" | jq -r '.author.login // "Unknown"')
+  local body=$(echo "$pr_data" | jq -r '.body // ""' | sed 's/\r//g')
+  local url=$(echo "$pr_data" | jq -r '.url // ""')
+  local state=$(echo "$pr_data" | jq -r '.state // "UNKNOWN"')
+  local base_branch=$(echo "$pr_data" | jq -r '.baseRefName // "unknown"')
+  local head_branch=$(echo "$pr_data" | jq -r '.headRefName // "unknown"')
+  local created_at=$(echo "$pr_data" | jq -r '.createdAt // ""')
+  local updated_at=$(echo "$pr_data" | jq -r '.updatedAt // ""')
+  local review_decision=$(echo "$pr_data" | jq -r '.reviewDecision // "PENDING"')
+
+  # Start building output file
+  {
+    printf "# PR #%s: %s\n\n" "$pr_number" "$title"
+    printf "**Author:** %s  \n" "$author"
+    printf "**State:** %s  \n" "$state"
+    printf "**Review Status:** %s  \n" "$review_decision"
+    printf "**Branch:** \`%s\` → \`%s\`  \n" "$head_branch" "$base_branch"
+    printf "**Created:** %s  \n" "$created_at"
+    printf "**Updated:** %s  \n" "$updated_at"
+    printf "**URL:** %s\n\n" "$url"
+
+    if [[ -n "$body" && "$body" != "null" ]]; then
+      printf "## Description\n\n%s\n\n" "$body"
+    fi
+
+    # Get PR reviews
+    local reviews_data=$(gh pr view "$pr_number" $repo_context --json reviews | tr -d '\000-\010\013\014\016-\037')
+
+    if [[ "$reviews_data" != "null" ]] && [[ $(echo "$reviews_data" | jq '.reviews | length' 2>/dev/null || echo 0) -gt 0 ]]; then
+      printf "## Reviews\n\n"
+
+      echo "$reviews_data" | jq -r '.reviews[] |
+        "### Review by @" + .author.login + " (" + .state + ")\n" +
+        "**Submitted:** " + .submittedAt + "\n\n" +
+        (.body // "*(No review comment)*") + "\n"' 2>/dev/null || echo "*(Error parsing reviews)*"
+
+      printf "\n"
+    fi
+
+    # Get review comments (code comments)
+    printf "## Code Comments\n\n"
+
+    # First save the raw comments to a temp file to avoid control character issues in pipelines
+    local temp_comments="/tmp/prmd_comments_$$"
+    if gh api "repos/{owner}/{repo}/pulls/$pr_number/comments" --paginate > "$temp_comments" 2>/dev/null; then
+      local total_comments=$(jq -r '. | length' < "$temp_comments" 2>/dev/null || echo 0)
+
+      if [[ "$total_comments" -gt 0 ]]; then
+        local has_comments=0
+
+        for ((i=0; i<total_comments; i++)); do
+          # Extract each field separately to avoid complex jq expressions with control chars
+          local in_reply_to=$(jq -r ".[$i].in_reply_to_id // empty" < "$temp_comments" 2>/dev/null)
+          [[ -n "$in_reply_to" && "$in_reply_to" != "null" ]] && continue
+
+          # If filtering resolved comments, check resolved status
+          if [[ $filter_resolved -eq 1 ]]; then
+            local resolved_at=$(jq -r ".[$i].resolved_at // empty" < "$temp_comments" 2>/dev/null)
+            [[ -n "$resolved_at" && "$resolved_at" != "null" ]] && continue
+          fi
+
+          has_comments=1
+
+          # Extract fields
+          local file_path=$(jq -r ".[$i].path" < "$temp_comments" 2>/dev/null || echo "unknown")
+          local line_num=$(jq -r ".[$i].line // .[$i].original_line // \"N/A\"" < "$temp_comments" 2>/dev/null || echo "N/A")
+          local author=$(jq -r ".[$i].user.login" < "$temp_comments" 2>/dev/null || echo "unknown")
+          local created_at=$(jq -r ".[$i].created_at" < "$temp_comments" 2>/dev/null || echo "unknown")
+          local body=$(jq -r ".[$i].body" < "$temp_comments" 2>/dev/null || echo "No body")
+          local diff_hunk=$(jq -r ".[$i].diff_hunk // empty" < "$temp_comments" 2>/dev/null)
+
+          # Output the comment
+          printf "**File:** \`%s\`\n" "$file_path"
+          printf "**Line:** %s\n" "$line_num"
+          printf "**Author:** @%s\n" "$author"
+          printf "**Created:** %s\n\n" "$created_at"
+          printf "%s\n\n" "$body"
+
+          if [[ -n "$diff_hunk" && "$diff_hunk" != "null" && "$diff_hunk" != "" ]]; then
+            printf "\`\`\`diff\n%s\n\`\`\`\n\n" "$diff_hunk"
+          fi
+
+          printf "---\n\n"
+        done
+
+        if [[ $has_comments -eq 0 ]]; then
+          if [[ $filter_resolved -eq 1 ]]; then
+            printf "*(No unresolved code comments)*\n\n"
+          else
+            printf "*(No code comments)*\n\n"
+          fi
+        fi
+      else
+        printf "*(No code comments)*\n\n"
+      fi
+
+      rm -f "$temp_comments"
+    else
+      printf "*(Error fetching code comments)*\n\n"
+    fi
+
+    # Get issue comments (general PR conversation)
+    printf "## Conversation\n\n"
+
+    gh api "repos/{owner}/{repo}/issues/$pr_number/comments" --paginate 2>/dev/null | \
+    sed 's/\r//g' | \
+    jq -r '.[] |
+      "### Comment by @" + .user.login +
+      (if .user.type == "Bot" then " (bot)" else "" end) + "\n" +
+      "**Created:** " + .created_at + "\n\n" +
+      .body + "\n"' 2>/dev/null || printf "*(No conversation or error parsing)*\n"
+
+  } > "$temp_file"
+
+  # Output result
+  if [[ $print_mode -eq 1 ]]; then
+    cat "$temp_file"
+  else
+    if cp "$temp_file" "$file"; then
+      echo "Exported PR #$pr_number to $file"
+      if [[ $filter_resolved -eq 1 ]]; then
+        echo "(Filtered out resolved comments)"
+      fi
+    else
+      echo "Error: Could not write to $file"
+      rm -f "$temp_file"
+      return 1
+    fi
+  fi
+
+  rm -f "$temp_file"
+}
+
 
 # See old branches listed
 alias old_b='git for-each-ref --sort=committerdate refs/heads/ --format="%(refname:short) - %(committerdate:relative)"'
@@ -146,9 +416,6 @@ function prune_old_b() {
   done
 }
 
-
-
-# ...
 
 function pfi() {
   # Fetch and check out a branch from a fork

@@ -96,6 +96,8 @@ $ZDOTDIR/.aliases
 ###
 romkatv/powerlevel10k
 
+### Performance Enhancement
+romkatv/zsh-defer
 
 zsh-users/zsh-completions kind:fpath path:src
 zdharma-continuum/fast-syntax-highlighting kind:defer
