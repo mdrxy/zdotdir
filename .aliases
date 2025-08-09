@@ -3,6 +3,8 @@
 # .aliases - Set whatever shell aliases you want.
 #
 
+alias utc="date -u && date -u +%s"
+
 # Work
 alias f="make format"
 alias lt="make lint"
@@ -12,6 +14,9 @@ alias uvs="uv sync --all-groups"
 alias utc="date -u && date -u +%s"
 alias t="make test"
 alias ti="make integration_tests"
+
+# python
+alias python=python3
 
 # python
 alias python=python3
