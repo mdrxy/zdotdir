@@ -28,6 +28,13 @@ ti() {
     make integration_tests TEST_FILE="$1"
   fi
 }
+tti() {
+  if [ $# -eq 0 ]; then
+    make test && make integration_tests
+  else
+    make test TEST_FILE="$1" && make integration_tests TEST_FILE="$1"
+  fi
+}
 
 # python
 alias python=python3
