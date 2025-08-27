@@ -124,3 +124,4 @@ function cd() {
 
 # Activate venv for current directory on shell startup
 auto_venv
+export PATH="/opt/homebrew/opt/postgresql@16/bin:$PATH"

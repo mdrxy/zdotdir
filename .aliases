@@ -10,10 +10,24 @@ alias f="make format"
 alias lt="make lint"
 alias fix="uv run --all-groups ruff check . --fix"
 alias lf="f && lt"
+alias lft="lf && t"
+alias lfti="lf && t && ti"
 alias uvs="uv sync --all-groups"
 alias utc="date -u && date -u +%s"
-alias t="make test"
-alias ti="make integration_tests"
+t() {
+  if [ $# -eq 0 ]; then
+    make test
+  else
+    make test TEST_FILE="$1"
+  fi
+}
+ti() {
+  if [ $# -eq 0 ]; then
+    make integration_tests
+  else
+    make integration_tests TEST_FILE="$1"
+  fi
+}
 
 # python
 alias python=python3
