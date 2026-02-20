@@ -56,6 +56,14 @@ autoload -Uz $ZFUNCDIR/*(.:t)
 [[ -d ${ZDOTDIR:-$HOME}/.antidote ]] ||
   git clone https://github.com/mattmc3/antidote ${ZDOTDIR:-$HOME}/.antidote
 
+# OMZ's theme-and-appearance.zsh was removed from .zsh_plugins.txt because it
+# forks subprocesses (test-ls-args) to probe ls color support at startup (~4ms).
+# On macOS the answer is always `ls -G`, so we hardcode it. The other things
+# that file provides (colors autoload, prompt_subst, ZSH_THEME_* vars) are
+# unused since Powerlevel10k handles its own prompt setup.
+export LSCOLORS="Gxfxcxdxbxegedabagacad"
+alias ls='ls -G'
+
 source ${ZDOTDIR:-$HOME}/.antidote/antidote.zsh
 antidote load
 
@@ -82,7 +90,7 @@ zstyle ':omz:update' mode disabled # Disable automatic updates for faster startu
 # Skip manual compinit to avoid duplication
 
 
-eval "$(fnm env --use-on-cd)"
+zsh-defer eval "$(fnm env --use-on-cd)"
 
 
 # To customize prompt, run `p10k configure` or edit ~/.config/zsh/.p10k.zsh.
@@ -94,34 +102,47 @@ eval "$(fnm env --use-on-cd)"
 # source /opt/homebrew/opt/chruby/share/chruby/auto.sh
 # chruby ruby-3.4.1
 
-# Auto-activate virtual environments when changing directories
+# Auto-activate virtual environments when changing directories.
+# Walks from $PWD up to / looking for .venv/bin/activate.
+#
+# Performance notes:
+#   - Uses ${dir%/*} instead of $(dirname "$dir") to avoid forking a
+#     subprocess on every loop iteration (~21ms → ~0ms).
+#     ${dir:-/} handles the /foo edge case where %/* yields empty string.
+#   - Only hooked via chpwd (not a cd() wrapper). chpwd is a built-in zsh
+#     hook that fires on cd, pushd, popd, and auto_cd, so a cd() wrapper
+#     would just double-call auto_venv and break pushd/popd triggering.
+#   - Startup call is deferred via zsh-defer so the prompt appears
+#     immediately; the venv activates a moment later.
 function auto_venv() {
-    # Deactivate current venv if active
     if [[ -n "$VIRTUAL_ENV" ]]; then
         deactivate 2>/dev/null
     fi
 
-    # Look for .venv in current directory and parent directories
     local dir="$PWD"
     while [[ "$dir" != "/" ]]; do
         if [[ -f "$dir/.venv/bin/activate" ]]; then
             source "$dir/.venv/bin/activate" >/dev/null 2>&1
             return
         fi
-        dir="$(dirname "$dir")"
+        dir=${dir%/*}
+        dir=${dir:-/}
     done
 }
 
-# Hook auto_venv to directory changes (works with auto_cd and regular cd)
 function chpwd() {
     auto_venv
 }
 
-# Also hook to cd command for compatibility
-function cd() {
-    builtin cd "$@" && auto_venv
-}
-
-# Activate venv for current directory on shell startup
-auto_venv
+zsh-defer auto_venv
 export PATH="/opt/homebrew/opt/postgresql@16/bin:$PATH"
+
+# bun completions (deferred for faster startup)
+zsh-defer source "/Users/mdrxy/.bun/_bun"
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
+
+
+
+
+

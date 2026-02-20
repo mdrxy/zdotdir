@@ -6,6 +6,8 @@
 alias utc="date -u && date -u +%s"
 
 # Work
+alias da="deepagents"
+alias cl="claude"
 alias f="make format"
 alias lt="make lint"
 alias fix="uv run --all-groups ruff check . --fix"
@@ -14,6 +16,8 @@ alias lft="lf && t"
 alias lfti="lf && t && ti"
 alias uvs="uv sync --all-groups"
 alias utc="date -u && date -u +%s"
+alias ghpr="gh pr checkout"
+alias grrma='git remote | grep -v "^origin$" | xargs -I {} git remote remove {}'
 t() {
   if [ $# -eq 0 ]; then
     make test
@@ -36,8 +40,6 @@ tti() {
   fi
 }
 
-# python
-alias python=python3
 
 # python
 alias python=python3

@@ -50,26 +50,22 @@
 # don't have to worry about whether OMZ will work correctly.
 getantidote/use-omz
 
-# Regarding OMZ libs - you may choose to use all of OMZ's lib like so:
-ohmyzsh/ohmyzsh path:lib
-# -OR-
-# If you really know what you want and nothing else, you might be able to
-# choose only the specific libs you need:
-#   ohmyzsh/ohmyzsh path:lib/clipboard.zsh
-#   ohmyzsh/ohmyzsh path:lib/history.zsh
-#   ohmyzsh/ohmyzsh path:lib/completion.zsh
-# -OR-
-# You may decide not to load anything from lib at all.
+# Only load the OMZ libs we actually use (trimmed from full path:lib for faster startup)
+ohmyzsh/ohmyzsh path:lib/clipboard.zsh
+ohmyzsh/ohmyzsh path:lib/completion.zsh
+ohmyzsh/ohmyzsh path:lib/directories.zsh
+ohmyzsh/ohmyzsh path:lib/history.zsh
+ohmyzsh/ohmyzsh path:lib/key-bindings.zsh
 
 # Now, let's pick our Oh My Zsh utilty plugins
-ohmyzsh/ohmyzsh path:plugins/colored-man-pages
-ohmyzsh/ohmyzsh path:plugins/copybuffer
-ohmyzsh/ohmyzsh path:plugins/copyfile
-ohmyzsh/ohmyzsh path:plugins/copypath
-ohmyzsh/ohmyzsh path:plugins/extract
-ohmyzsh/ohmyzsh path:plugins/git
-ohmyzsh/ohmyzsh path:plugins/python
-ohmyzsh/ohmyzsh path:plugins/brew
+ohmyzsh/ohmyzsh path:plugins/colored-man-pages kind:defer
+ohmyzsh/ohmyzsh path:plugins/copybuffer kind:defer
+ohmyzsh/ohmyzsh path:plugins/copyfile kind:defer
+ohmyzsh/ohmyzsh path:plugins/copypath kind:defer
+ohmyzsh/ohmyzsh path:plugins/extract kind:defer
+ohmyzsh/ohmyzsh path:plugins/git kind:defer
+ohmyzsh/ohmyzsh path:plugins/python kind:defer
+ohmyzsh/ohmyzsh path:plugins/brew kind:defer
 
 ### Local Plugins
 #

@@ -22,3 +22,6 @@ path=(
   /usr/local/{,s}bin(N)
   $path
 )
+
+# uv
+export PATH="/Users/mdrxy/.local/share/../bin:$PATH"
