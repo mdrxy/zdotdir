@@ -1,0 +1,103 @@
+#!/bin/zsh
+# Strip / restore Cursor.app's file-type claims so it stops hijacking
+# Finder's "Open With" submenu. Re-run after Cursor updates.
+#
+# usage: cursor-detype <strip|restore|status>
+# env:   CURSOR_APP   path to Cursor.app (default: /Applications/Cursor.app)
+
+emulate -L zsh
+setopt err_return no_unset pipe_fail
+
+local APP="${CURSOR_APP:-/Applications/Cursor.app}"
+local PLIST="$APP/Contents/Info.plist"
+local BAK="$PLIST.bak"
+local LSREG=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
+local -a KEYS
+KEYS=(CFBundleDocumentTypes UTExportedTypeDeclarations UTImportedTypeDeclarations)
+
+_cdt_usage() {
+  print -r -- "usage: cursor-detype <strip|restore|status>"
+  print -r -- ""
+  print -r -- "  strip    Remove Cursor's file-type keys, back up Info.plist, re-register."
+  print -r -- "  restore  Restore Info.plist from the .bak and re-register."
+  print -r -- "  status   Report which keys are present and whether a backup exists."
+  print -r -- ""
+  print -r -- "  CURSOR_APP   override path to Cursor.app (default: /Applications/Cursor.app)"
+}
+
+_cdt_require_app() {
+  [[ -d "$APP" ]]   || { print -ru2 -- "error: $APP not found"; return 1 }
+  [[ -f "$PLIST" ]] || { print -ru2 -- "error: $PLIST not found"; return 1 }
+}
+
+_cdt_running() {
+  pgrep -fq "$APP/Contents/MacOS/Cursor"
+}
+
+_cdt_reregister() {
+  # -kill was removed in recent macOS; -r alone rebuilds the LS database.
+  "$LSREG" -f "$APP" || true
+  "$LSREG" -r -domain local -domain system -domain user || true
+  killall Finder 2>/dev/null || true
+}
+
+_cdt_status() {
+  _cdt_require_app
+  local -a present
+  local k
+  for k in $KEYS; do
+    if /usr/libexec/PlistBuddy -c "Print :$k" "$PLIST" >/dev/null 2>&1; then
+      present+=($k)
+    fi
+  done
+  if (( ${#present} == 0 )); then
+    print -r -- "stripped: no file-type keys present in $PLIST"
+  else
+    print -r -- "active:   $PLIST still declares: $present"
+  fi
+  [[ -f "$BAK" ]] && print -r -- "backup:   $BAK exists" || print -r -- "backup:   none"
+}
+
+_cdt_strip() {
+  _cdt_require_app
+  if _cdt_running; then
+    print -ru2 -- "error: Cursor is running — quit it first"
+    return 1
+  fi
+  if [[ ! -f "$BAK" ]]; then
+    sudo cp "$PLIST" "$BAK"
+    print -r -- "backup -> $BAK"
+  else
+    print -r -- "backup already exists ($BAK), leaving untouched"
+  fi
+  local k
+  for k in $KEYS; do
+    if sudo /usr/libexec/PlistBuddy -c "Delete :$k" "$PLIST" 2>/dev/null; then
+      print -r -- "deleted :$k"
+    else
+      print -r -- "skipped :$k (not present)"
+    fi
+  done
+  _cdt_reregister
+  print -r -- "done. Cursor entries should be gone from Finder."
+}
+
+_cdt_restore() {
+  _cdt_require_app
+  [[ -f "$BAK" ]] || { print -ru2 -- "error: no backup at $BAK"; return 1 }
+  if _cdt_running; then
+    print -ru2 -- "error: Cursor is running — quit it first"
+    return 1
+  fi
+  sudo mv "$BAK" "$PLIST"
+  _cdt_reregister
+  print -r -- "restored from backup."
+}
+
+case "${1:-}" in
+  strip)   _cdt_strip ;;
+  restore) _cdt_restore ;;
+  status)  _cdt_status ;;
+  -h|--help|help|"") _cdt_usage ;;
+  *) _cdt_usage; return 2 ;;
+esac
