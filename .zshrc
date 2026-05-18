@@ -90,7 +90,9 @@ zstyle ':omz:update' mode disabled # Disable automatic updates for faster startu
 # Skip manual compinit to avoid duplication
 
 
-zsh-defer eval "$(fnm env --use-on-cd)"
+eval "$(mise activate zsh)"
+
+zsh-defer eval "$(fnm env --use-on-cd --shell zsh --log-level quiet)"
 
 
 # To customize prompt, run `p10k configure` or edit ~/.config/zsh/.p10k.zsh.

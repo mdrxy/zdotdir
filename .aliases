@@ -3,10 +3,9 @@
 # .aliases - Set whatever shell aliases you want.
 #
 
-alias utc="date -u && date -u +%s"
-
 # Work
-alias da="deepagents"
+alias lock="make lock"
+alias da="dcode"
 alias cl="claude"
 alias f="make format"
 alias lt="make lint"
@@ -16,7 +15,69 @@ alias lft="lf && t"
 alias lfti="lf && t && ti"
 alias uvs="uv sync --all-groups"
 alias utc="date -u && date -u +%s"
-alias ghpr="gh pr checkout"
+ghpr() {
+  # Wrap `gh pr checkout` to self-heal missing upstream tracking.
+  #
+  # `gh pr checkout` only configures `branch.<name>.remote/.merge` on the
+  # *initial* checkout, and only when an existing remote matches the PR's
+  # head repo. Re-checkouts of an already-local branch, or checkouts done
+  # before the fork remote existed, leave the branch with no upstream
+  # (which makes VSCode show "Publish Branch", etc.). After running
+  # `gh pr checkout`, derive the head remote+branch from PR metadata and
+  # set upstream — adding the fork as a named remote if none matches.
+  gh pr checkout "$@" || return $?
+
+  # Detached HEAD (e.g. `gh pr checkout --detach`) — nothing to track.
+  git symbolic-ref -q HEAD >/dev/null || return 0
+
+  # Already has upstream — nothing to do.
+  if git rev-parse --abbrev-ref --symbolic-full-name '@{u}' >/dev/null 2>&1; then
+    return 0
+  fi
+
+  local data head_owner head_repo head_branch
+  data=$(gh pr view --json headRepositoryOwner,headRepository,headRefName 2>/dev/null) || {
+    echo "ghpr: could not read PR metadata to set upstream" >&2
+    return 0
+  }
+  head_owner=$(echo "$data" | jq -r '.headRepositoryOwner.login // empty')
+  head_repo=$(echo "$data"  | jq -r '.headRepository.name // empty')
+  head_branch=$(echo "$data" | jq -r '.headRefName // empty')
+
+  if [[ -z "$head_owner" || -z "$head_repo" || -z "$head_branch" ]]; then
+    echo "ghpr: incomplete PR metadata; leaving upstream unset" >&2
+    return 0
+  fi
+
+  # Find a remote whose URL points to head_owner/head_repo (ssh or https form).
+  local remote url found_remote=""
+  local target_ssh="git@github.com:${head_owner}/${head_repo}"
+  local target_https="https://github.com/${head_owner}/${head_repo}"
+  for remote in $(git remote); do
+    url=$(git remote get-url "$remote" 2>/dev/null)
+    url="${url%.git}"
+    if [[ "$url" == "$target_ssh" || "$url" == "$target_https" ]]; then
+      found_remote="$remote"
+      break
+    fi
+  done
+
+  if [[ -z "$found_remote" ]]; then
+    found_remote="$head_owner"
+    if ! git remote add "$found_remote" "${target_ssh}.git" 2>/dev/null; then
+      echo "ghpr: could not add remote '$found_remote' for ${head_owner}/${head_repo}" >&2
+      return 0
+    fi
+    echo "ghpr: added remote '$found_remote' -> ${target_ssh}.git"
+  fi
+
+  git fetch "$found_remote" "$head_branch" >/dev/null 2>&1
+  if git branch --set-upstream-to="${found_remote}/${head_branch}" >/dev/null 2>&1; then
+    echo "ghpr: set upstream to ${found_remote}/${head_branch}"
+  else
+    echo "ghpr: failed to set upstream to ${found_remote}/${head_branch}" >&2
+  fi
+}
 alias grrma='git remote | grep -v "^origin$" | xargs -I {} git remote remove {}'
 t() {
   if [ $# -eq 0 ]; then
@@ -49,7 +110,7 @@ alias remote='git remote -v'
 
 # Enhanced git workflow aliases
 alias gfp='git fetch --prune'  # Fetch and prune deleted remote branches
-alias gbd='git branch --merged | grep -v "main\|master" | xargs -n 1 git branch -d'  # Delete merged branches (safe cleanup)
+alias gbd='git branch --merged | grep -v -e main -e master -e "\*" | while read -r b; do git branch -d "$b"; done'  # Delete merged branches (safe cleanup)
 alias gbu='git branch --no-merged | grep -v "main\|master"'  # List unmerged branches
 
 # Ruby - lazy loaded
