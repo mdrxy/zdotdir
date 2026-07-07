@@ -5,8 +5,9 @@
 
 # Work
 alias lock="make lock"
-alias da="dcode"
-alias cl="claude"
+alias dap="dcode --interpreter --interpreter-tools \"read_file,glob,grep,task\""
+alias da="dcode-dev -y --interpreter-tools \"safe\""
+alias cl="claude --permission-mode \"auto\""
 alias f="make format"
 alias lt="make lint"
 alias fix="uv run --all-groups ruff check . --fix"
